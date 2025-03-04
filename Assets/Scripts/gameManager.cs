@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -41,7 +41,7 @@ public class gameManager : MonoBehaviour
                         gameObject = Resources.Load<GameObject>("Prefabs/Monster2");
                     y = -0.315f;
                     if(rand.Next(4)==0){
-                        Instantiate(Resources.Load<GameObject>("Prefabs/Monster3"), new Vector3(20, 6, 0), Barrier_SetPos.transform.rotation);
+                        Instantiate(Resources.Load<GameObject>("Prefabs/Monster3"), new Vector3(20, 5, 0), Barrier_SetPos.transform.rotation);
                     }
                         break;
                     

@@ -1,20 +1,20 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//游戏入口脚本
+//娓告垙鍏ュ彛鑴氭湰
 public class GameApp : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
     {
-        //初始化音频管理器
+        //鍒濆鍖栭煶棰戠鐞嗗櫒
         AudioManager.Instance.Init();
 
-        //显示UI
+        //鏄剧ずUI
         UIManager.Instance.ShowUI<CompassUI>("CompassUI");
-        
-        //播放BGM
+
+        //鎾斁BGM
         AudioManager.Instance.PlayBGM("Start");
 
 

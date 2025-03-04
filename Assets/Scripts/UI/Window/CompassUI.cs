@@ -1,10 +1,10 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
-// Õ½¶·Ò³Ãæ
+// æˆ˜æ–—é¡µé¢
 public class CompassUI : UIBase
 {
 
@@ -15,7 +15,7 @@ public class CompassUI : UIBase
     {
 
 
-        // °ó¶¨ UI ÔªËØ
+        // ç»‘å®š UI å…ƒç´ 
         Step_TxT = FindText("Compass/Step");
 
         CompassImg = FindImage("Compass");
@@ -26,13 +26,13 @@ public class CompassUI : UIBase
 
     private void Start()
     {
-        // ³õÊ¼»¯ UI ÏÔÊ¾
+        // åˆå§‹åŒ– UI æ˜¾ç¤º
         UpdateStep();
     }
 
   
 
-    // ¸üĞÂÁ¦Á¿ÌáÉıÏÔÊ¾
+    // æ›´æ–°åŠ›é‡æå‡æ˜¾ç¤º
     public void UpdateStep()
     {
 
@@ -43,13 +43,13 @@ public class CompassUI : UIBase
 
 
 
-    // ¹¤¾ß·½·¨£º°ó¶¨ Text
+    // å·¥å…·æ–¹æ³•ï¼šç»‘å®š Text
     private Text FindText(string path)
     {
         return transform.Find(path)?.GetComponent<Text>();
     }
 
-    // ¹¤¾ß·½·¨£º°ó¶¨ Image
+    // å·¥å…·æ–¹æ³•ï¼šç»‘å®š Image
     private Image FindImage(string path)
     {
         return transform.Find(path)?.GetComponent<Image>();

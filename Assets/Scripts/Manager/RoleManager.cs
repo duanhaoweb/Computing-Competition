@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RoleManager 
 {
     public static RoleManager Instance =new RoleManager();
-    public int Step = 1;//²½Êı
+    public int Step = 1;//æ­¥æ•°
 
     public void Init()
     {
@@ -16,11 +16,11 @@ public class RoleManager
     }
     public void CreatRole()
     {
-        GameObject obj = Object.Instantiate(Resources.Load("Model/Player")) as GameObject;//´Ó×ÊÔ´Â·¾¶¼ÓÔØ¶ÔÓ¦µÄÈËÎïÄ£ĞÍ
+        GameObject obj = Object.Instantiate(Resources.Load("Model/Player")) as GameObject;//ä»èµ„æºè·¯å¾„åŠ è½½å¯¹åº”çš„äººç‰©æ¨¡å‹
 
-        Player player = obj.AddComponent<Player>();//Ìí¼ÓÈËÎï½Å±¾
+        Player player = obj.AddComponent<Player>();//æ·»åŠ äººç‰©è„šæœ¬
 
-        obj.transform.position = new Vector3(-7,3, 6);//ÈËÎïµÄÎ»ÖÃ
+        obj.transform.position = new Vector3(-7,3, 6);//äººç‰©çš„ä½ç½®
     }
 
 }

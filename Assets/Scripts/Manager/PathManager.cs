@@ -1,65 +1,65 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class PathManager : MonoBehaviour
 {
-    [Header("ÃÔ¹¬ÉèÖÃ")]
-    [SerializeField] private Transform player;  // Íæ¼Ò¶ÔÏó
-    [SerializeField] private float gridSize = 1f;  // Ã¿¸ö Cube µÄ´óĞ¡
-    [SerializeField] private List<GameObject> mazeCubes;  // ËùÓĞÃÔ¹¬ Cube µÄÁĞ±í
+    [Header("è¿·å®«è®¾ç½®")]
+    [SerializeField] private Transform player;  // ç©å®¶å¯¹è±¡
+    [SerializeField] private float gridSize = 1f;  // æ¯ä¸ª Cube çš„å¤§å°
+    [SerializeField] private List<GameObject> mazeCubes;  // æ‰€æœ‰è¿·å®« Cube çš„åˆ—è¡¨
 
-    [Header("¿É¼ûÉèÖÃ")]
-    [SerializeField] private Color visitedColor = Color.white;  // ×ß¹ıµÄ¸ñ×ÓµÄÑÕÉ«
-    [SerializeField] private float visibilityRange = 1.5f;  // Íæ¼Ò¿É¼ûµÄ·¶Î§£¨1.5x1.5£©
+    [Header("å¯è§è®¾ç½®")]
+    [SerializeField] private Color visitedColor = Color.white;  // èµ°è¿‡çš„æ ¼å­çš„é¢œè‰²
+    [SerializeField] private float visibilityRange = 1.5f;  // ç©å®¶å¯è§çš„èŒƒå›´ï¼ˆ1.5x1.5ï¼‰
 
-    private HashSet<Vector3> visitedPositions = new HashSet<Vector3>();  // ¼ÇÂ¼Íæ¼ÒÒÑ×ß¹ıµÄÎ»ÖÃ
+    private HashSet<Vector3> visitedPositions = new HashSet<Vector3>();  // è®°å½•ç©å®¶å·²èµ°è¿‡çš„ä½ç½®
 
     void Start()
     {
-        // ³õÊ¼»¯£º½«ËùÓĞµÄ Cube ÉèÖÃÎª²»¿É¼û
+        // åˆå§‹åŒ–ï¼šå°†æ‰€æœ‰çš„ Cube è®¾ç½®ä¸ºä¸å¯è§
         SetAllCubesInvisible();
     }
 
     void Update()
     {
-        // »ñÈ¡Íæ¼ÒµÄµ±Ç°Î»ÖÃ
+        // è·å–ç©å®¶çš„å½“å‰ä½ç½®
         Vector3 playerPosition = player.position;
 
-        // ¼ÆËãÍæ¼Ò¿É¼ûµÄ·¶Î§£º1.5 x 1.5 µÄÇøÓò
+        // è®¡ç®—ç©å®¶å¯è§çš„èŒƒå›´ï¼š1.5 x 1.5 çš„åŒºåŸŸ
         Vector3 minPosition = new Vector3(playerPosition.x - visibilityRange / 2, 0f, playerPosition.z - visibilityRange / 2);
         Vector3 maxPosition = new Vector3(playerPosition.x + visibilityRange / 2, 0f, playerPosition.z + visibilityRange / 2);
 
-        // ±éÀúËùÓĞÃÔ¹¬ Cube£¬²¢¼ì²éËüÃÇÊÇ·ñÔÚ¿É¼û·¶Î§ÄÚ
+        // éå†æ‰€æœ‰è¿·å®« Cubeï¼Œå¹¶æ£€æŸ¥å®ƒä»¬æ˜¯å¦åœ¨å¯è§èŒƒå›´å†…
         foreach (var cube in mazeCubes)
         {
             Vector3 cubePosition = cube.transform.position;
 
-            // ¼ì²é Cube ÊÇ·ñÔÚÍæ¼Ò¿É¼ûµÄ·¶Î§ÄÚ
+            // æ£€æŸ¥ Cube æ˜¯å¦åœ¨ç©å®¶å¯è§çš„èŒƒå›´å†…
             if (cubePosition.x >= minPosition.x && cubePosition.x <= maxPosition.x &&
                 cubePosition.z >= minPosition.z && cubePosition.z <= maxPosition.z)
             {
-                // Èç¹û Cube »¹Ã»ÓĞ±»×ß¹ı£¬ÉèÖÃÎª¿É¼û²¢±äÉ«
+                // å¦‚æœ Cube è¿˜æ²¡æœ‰è¢«èµ°è¿‡ï¼Œè®¾ç½®ä¸ºå¯è§å¹¶å˜è‰²
                 if (!visitedPositions.Contains(cubePosition))
                 {
                     visitedPositions.Add(cubePosition);
-                    cube.SetActive(true);  // Ê¹ Cube ¿É¼û
-                    cube.GetComponent<Renderer>().material.color = visitedColor;  // ĞŞ¸ÄÑÕÉ«
+                    cube.SetActive(true);  // ä½¿ Cube å¯è§
+                    cube.GetComponent<Renderer>().material.color = visitedColor;  // ä¿®æ”¹é¢œè‰²
                 }
             }
             else
             {
-                // Èç¹û Cube ²»ÔÚÍæ¼Ò·¶Î§ÄÚ£¬±£³Ö²»¿É¼û
+                // å¦‚æœ Cube ä¸åœ¨ç©å®¶èŒƒå›´å†…ï¼Œä¿æŒä¸å¯è§
                 cube.SetActive(false);
             }
         }
     }
 
-    // ÉèÖÃËùÓĞ Cube ²»¿É¼û
+    // è®¾ç½®æ‰€æœ‰ Cube ä¸å¯è§
     private void SetAllCubesInvisible()
     {
         foreach (var cube in mazeCubes)
         {
-            cube.SetActive(false);  // ÉèÖÃÃ¿¸ö Cube ²»¿É¼û
+            cube.SetActive(false);  // è®¾ç½®æ¯ä¸ª Cube ä¸å¯è§
         }
     }
 }

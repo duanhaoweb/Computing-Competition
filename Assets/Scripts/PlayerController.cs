@@ -1,47 +1,47 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private int speed = 5;  // ÒÆ¶¯ËÙ¶È
-    [SerializeField] private Animator anim;  // ¶¯»­¿ØÖÆÆ÷
-    [SerializeField] private SpriteRenderer playerSprite;  // Íæ¼Ò¾«ÁéäÖÈ¾Æ÷
-    private Rigidbody rb;  // ¸ÕÌå
-    private Vector3 movement;  // ½ÇÉ«ÒÆ¶¯·½Ïò
+    [SerializeField] private int speed = 5;  // ç§»åŠ¨é€Ÿåº¦
+    [SerializeField] private Animator anim;  // åŠ¨ç”»æ§åˆ¶å™¨
+    [SerializeField] private SpriteRenderer playerSprite;  // ç©å®¶ç²¾çµæ¸²æŸ“å™¨
+    private Rigidbody rb;  // åˆšä½“
+    private Vector3 movement;  // è§’è‰²ç§»åŠ¨æ–¹å‘
 
-    private const string IS_WALK_PARAM = "IsWalk";  // ¶¯»­²ÎÊı£ºÊÇ·ñĞĞ×ß
-    private bool isWalking = false;  // ÅĞ¶ÏÊÇ·ñÔÚĞĞ×ß
+    private const string IS_WALK_PARAM = "IsWalk";  // åŠ¨ç”»å‚æ•°ï¼šæ˜¯å¦è¡Œèµ°
+    private bool isWalking = false;  // åˆ¤æ–­æ˜¯å¦åœ¨è¡Œèµ°
 
     // Start is called before the first frame update
     private void Start()
     {
-        rb = gameObject.GetComponent<Rigidbody>();  // »ñÈ¡¸ÕÌå×é¼ş
+        rb = gameObject.GetComponent<Rigidbody>();  // è·å–åˆšä½“ç»„ä»¶
     }
 
     // Update is called once per frame
     private void Update()
     {
-        HandleMovement();  // ¿ØÖÆÍæ¼ÒÒÆ¶¯
-        UpdateAnimation();  // ¸üĞÂ¶¯»­
+        HandleMovement();  // æ§åˆ¶ç©å®¶ç§»åŠ¨
+        UpdateAnimation();  // æ›´æ–°åŠ¨ç”»
     }
 
     private void HandleMovement()
     {
-        // »ñÈ¡Íæ¼ÒÊäÈë
-        float horizontal = Input.GetAxisRaw("Horizontal");  // A/D »ò ×ó/ÓÒ¼ıÍ·
-        float vertical = Input.GetAxisRaw("Vertical");  // W/S »ò ÉÏ/ÏÂ¼ıÍ·
+        // è·å–ç©å®¶è¾“å…¥
+        float horizontal = Input.GetAxisRaw("Horizontal");  // A/D æˆ– å·¦/å³ç®­å¤´
+        float vertical = Input.GetAxisRaw("Vertical");  // W/S æˆ– ä¸Š/ä¸‹ç®­å¤´
 
-        // ¼ÆËãÒÆ¶¯·½Ïò
+        // è®¡ç®—ç§»åŠ¨æ–¹å‘
         movement = new Vector3(horizontal, 0, vertical).normalized;
 
-        // Èç¹ûÓĞ°´¼üÊäÈë
+        // å¦‚æœæœ‰æŒ‰é”®è¾“å…¥
         if (movement.magnitude > 0)
         {
-            // Ã¿´Î°´¼üÊ±Ç°½ø1.5µ¥Î»
+            // æ¯æ¬¡æŒ‰é”®æ—¶å‰è¿›1.5å•ä½
             transform.Translate(movement * 3f * speed * Time.deltaTime, Space.World);
 
-            // Èç¹û²»ÊÇÕıÔÚĞĞ×ß£¬¿ªÊ¼ĞĞ×ß
+            // å¦‚æœä¸æ˜¯æ­£åœ¨è¡Œèµ°ï¼Œå¼€å§‹è¡Œèµ°
             if (!isWalking)
             {
                 isWalking = true;
@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // ËÉ¿ª°´¼üÍ£Ö¹ĞĞ×ß
+            // æ¾å¼€æŒ‰é”®åœæ­¢è¡Œèµ°
             if (isWalking)
             {
                 isWalking = false;
@@ -59,13 +59,13 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        // ¸üĞÂAnimatorµÄĞĞ×ß²ÎÊı
+        // æ›´æ–°Animatorçš„è¡Œèµ°å‚æ•°
         anim.SetBool(IS_WALK_PARAM, isWalking);
 
-        // Èç¹ûÓĞÒÆ¶¯·½Ïò£¬Ôò¸ù¾İÊäÈë·½Ïò¿ØÖÆÍæ¼Ò³¯Ïò
+        // å¦‚æœæœ‰ç§»åŠ¨æ–¹å‘ï¼Œåˆ™æ ¹æ®è¾“å…¥æ–¹å‘æ§åˆ¶ç©å®¶æœå‘
         if (movement.magnitude > 0)
         {
-            playerSprite.flipX = movement.x < 0;  // ¸ù¾İË®Æ½ÊäÈë·´×ªÍæ¼Ò³¯Ïò£¨×ó/ÓÒ£©
+            playerSprite.flipX = movement.x < 0;  // æ ¹æ®æ°´å¹³è¾“å…¥åè½¬ç©å®¶æœå‘ï¼ˆå·¦/å³ï¼‰
         }
     }
 }

@@ -1,20 +1,20 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private Transform player;  // Íæ¼Ò¶ÔÏóµÄTransform
-    [SerializeField] private Vector3 offset = new Vector3(0, 3, -6);  // ÉãÏñ»úÏà¶ÔÍæ¼ÒµÄÆ«ÒÆÁ¿
-    [SerializeField] private float followSpeed = 5f;  // ¸úËæËÙ¶È
+    [SerializeField] private Transform player;  // ç©å®¶å¯¹è±¡çš„Transform
+    [SerializeField] private Vector3 offset = new Vector3(0, 3, -6);  // æ‘„åƒæœºç›¸å¯¹ç©å®¶çš„åç§»é‡
+    [SerializeField] private float followSpeed = 5f;  // è·Ÿéšé€Ÿåº¦
 
     // Update is called once per frame
     private void Update()
     {
-        // È·±£ÉãÏñ»úÊ¼ÖÕ±£³ÖÔÚÍæ¼ÒµÄÇ°·½
+        // ç¡®ä¿æ‘„åƒæœºå§‹ç»ˆä¿æŒåœ¨ç©å®¶çš„å‰æ–¹
         Vector3 desiredPosition = player.position + offset;
 
-        // Æ½»¬µØÒÆ¶¯ÉãÏñ»úµ½Ä¿±êÎ»ÖÃ
+        // å¹³æ»‘åœ°ç§»åŠ¨æ‘„åƒæœºåˆ°ç›®æ ‡ä½ç½®
         transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
 
     }

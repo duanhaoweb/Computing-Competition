@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
 
-//ÊÂ¼ş¼àÌı
+//äº‹ä»¶ç›‘å¬
 public class UIEventTrigger : MonoBehaviour, IPointerClickHandler
 {
 

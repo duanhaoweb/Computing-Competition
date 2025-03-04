@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    protected Dictionary<string, string> data;//µĞÈËÊı¾İ±íĞÅÏ¢
+    protected Dictionary<string, string> data;//æ•Œäººæ•°æ®è¡¨ä¿¡æ¯
     public void Init(Dictionary<string, string> data)
     {
         this.data = data;

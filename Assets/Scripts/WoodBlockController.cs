@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using QFramework;
 using UnityEngine;
 
-public class WoodBlockController : MonoSingleton<WoodBlockController>
+public class WoodBlockController : MonoBehaviour
 {
     public List<WoodBlock> woodBlocks;
     [SerializeField] private RawImageRayCast rawImageRayCast;
+    [SerializeField] private GameObject plane;
     private WoodBlock BaseBlock => this.woodBlocks[0]; //基准木块
     private Vector3[] _relativePosition; // 复原时相对基准木块的位置
     private Quaternion[] _relativeRotation; // 复原时相对基准木块的旋转
@@ -21,6 +23,9 @@ public class WoodBlockController : MonoSingleton<WoodBlockController>
         this._relativeRotation = new Quaternion[this.woodBlocks.Count];
         this.rawImageRayCast.OnBeginDragEvent += this.OnStartDrag;
         this.rawImageRayCast.OnEndDragEvent += this.OnEndDrag;
+
+        this._onClickNullHandler = (v) => this.Select(this._selectedIndex);
+        this.rawImageRayCast.OnClickNullEvent += this._onClickNullHandler;
         foreach (var woodBlock in this.woodBlocks)
         {
             woodBlock.Index = this.woodBlocks.IndexOf(woodBlock);
@@ -29,6 +34,29 @@ public class WoodBlockController : MonoSingleton<WoodBlockController>
             this._relativeRotation[woodBlock.Index] =
                 woodBlock.transform.rotation * Quaternion.Inverse(this.BaseBlock.transform.rotation);
         }
+    }
+
+    public void Disable()
+    {
+        this.rawImageRayCast.enabled = false;
+        this.plane.SetActive(false);
+    }
+
+    public void Enable()
+    {
+        this.rawImageRayCast.enabled = true;
+        this.plane.SetActive(true);
+    }
+
+    private Action<Vector2> _onClickNullHandler; //仅用于处理点击空白处的事件
+
+    protected void OnDestroy()
+    {
+        this.rawImageRayCast.OnBeginDragEvent -= this.OnStartDrag;
+        this.rawImageRayCast.OnEndDragEvent -= this.OnEndDrag;
+        this.rawImageRayCast.OnClickNullEvent -= this._onClickNullHandler;
+        foreach (var woodBlock in this.woodBlocks) woodBlock.OnClickEvent.UnRegister(this.Select);
+        this._operationHistory.Clear();
     }
 
     private void OnStartDrag(Vector2 screenPosition)
@@ -62,7 +90,13 @@ public class WoodBlockController : MonoSingleton<WoodBlockController>
 
     public void Select(int index)
     {
-        if (this._selectedIndex != -1) this.SelectedWoodBlock.Select(false);
+        Debug.Log("Select " + index);
+        if (this._selectedIndex != -1)
+        {
+            if (this.SelectedWoodBlock.IsAnimating) return; // 正在移动或旋转时不响应点击
+            this.SelectedWoodBlock.Select(false);
+        }
+
         if (this._selectedIndex == index)
         {
             this._selectedIndex = -1;
@@ -134,7 +168,8 @@ public class WoodBlockController : MonoSingleton<WoodBlockController>
 
     private void UndoOperation()
     {
-        if (this._operationHistory.Count > 0 && this.SelectedWoodBlock.IsAnimating == false)
+        if (this._operationHistory.Count > 0 &&
+            (this._selectedIndex == -1 || this.SelectedWoodBlock.IsAnimating == false))
         {
             var operation = this._operationHistory.Peek();
             var block = this.woodBlocks[operation.index];
@@ -143,7 +178,7 @@ public class WoodBlockController : MonoSingleton<WoodBlockController>
                 operation = this._operationHistory.Pop();
                 // 执行反向操作
                 var r = new UnitOperation(-1, operation.type, -operation.value, operation.index);
-                block.DirectRotate(r.GetTargetQuaternion(block.transform.rotation));
+                block.TryRotate(r);
                 return;
             }
 

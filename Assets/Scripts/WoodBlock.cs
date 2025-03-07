@@ -1,5 +1,4 @@
-﻿using DefaultNamespace;
-using DG.Tweening;
+﻿using DG.Tweening;
 using QuickOutline.Scripts;
 using QFramework;
 using UnityEngine;
@@ -39,8 +38,8 @@ public class WoodBlock : MonoBehaviour
     }
 
     public int Index { get; set; }
-    public readonly EasyEvent<int> OnClickEvent = new();
-    private readonly EasyEvent _onHit = new();
+    public readonly EasyEvent<int> OnClickEvent = new EasyEvent<int>();
+    private readonly EasyEvent _onHit = new EasyEvent();
     private Tween _currentTween;
     private static readonly int HighLight = Shader.PropertyToID("_HighLight");
     private static readonly int Color = Shader.PropertyToID("_Color");
@@ -85,6 +84,7 @@ public class WoodBlock : MonoBehaviour
         this._onHit.Register(this.Restore);
         this._currentTween = this.transform.DOMove(target, 0.15f).OnComplete(() =>
         {
+            this._onHit.UnRegister(this.Restore);
             this._currentTween = null;
             move.success = true;
         });
@@ -106,6 +106,7 @@ public class WoodBlock : MonoBehaviour
         this._currentTween =
             this.transform.DORotateQuaternion(target, 0.2f).OnComplete(() =>
             {
+                this._onHit.UnRegister(this.Restore);
                 this._currentTween = null;
                 rotate.success = true;
             });
@@ -116,8 +117,10 @@ public class WoodBlock : MonoBehaviour
         this._onHit.UnRegister(this.Restore);
         this._isRestoring = true;
         this._currentTween?.Kill();
-        this._currentTween = this.transform.DOMove(this._originalPos, 0.2f);
-        this.transform.DORotateQuaternion(this._originalRot, 0.2f);
+
+        //恢复后再加0.2秒的停滞时间
+        this._currentTween = this.transform.DOMove(this._originalPos, 0.3f);
+        this.transform.DORotateQuaternion(this._originalRot, 0.3f);
         this._currentTween.OnComplete(() =>
         {
             this._currentTween = null;
@@ -170,7 +173,7 @@ public class WoodBlock : MonoBehaviour
             outline.OutlineMode = Outline.Mode.OutlineAll;
             outline.OutlineColor = ColorHelper.HexToColor("#5ee7df");
             outline.OutlineSubColor = ColorHelper.HexToColor("#b490ca");
-            outline.OutlineWidth = 3f;
+            outline.OutlineWidth = 9f;
         }
     }
 

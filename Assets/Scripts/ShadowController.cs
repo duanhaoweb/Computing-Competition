@@ -1,32 +1,28 @@
-﻿using QFramework;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class ShadowController : MonoSingleton<ShadowController>
+public class ShadowController : MonoBehaviour
 {
     [SerializeField] private GameObject shadow;
-    /*[SerializeField] private GameObject yAxisShadow;
-    [SerializeField] private GameObject zAxisShadow;*/
+    public static ShadowController Instance { get; private set; }
 
-    /*public GameObject GetShadow(ShadowType type)
+    private void Awake()
     {
-        return type switch
+        if (Instance != null && Instance != this)
         {
-            ShadowType.XAxis => this.xAxisShadow,
-            ShadowType.YAxis => this.yAxisShadow,
-            ShadowType.ZAxis => this.zAxisShadow,
-            _ => null
-        };
-    }*/
+            Destroy(this.gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
 
     public GameObject GetShadow()
     {
         return this.shadow;
     }
-}
 
-/*public enum ShadowType
-{
-        XAxis,
-        YAxis,
-        ZAxis
-}*/
+    private void OnDestroy()
+    {
+        Instance = null;
+    }
+}

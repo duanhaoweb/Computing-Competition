@@ -10,12 +10,21 @@ public class RawImageRayCast : MonoBehaviour, IPointerMoveHandler, IPointerDownH
     // 渲染 RenderTexture 的相机的位置和旋转, 第一个是位置, 第二个是旋转
     public int CurrentPreviewCameraIndex { get; private set; }
 
-    public readonly (Vector3, Vector3)[] PreviewCameraTransforms = new[]
+    /*public readonly (Vector3, Vector3)[] PreviewCameraTransforms = new[]
     {
         (new Vector3(-10, 8, -10), new Vector3(30, 45, 0)),
         (new Vector3(-10, 8, 10), new Vector3(30, 135, 0)),
         (new Vector3(10, 8, 10), new Vector3(30, -135, 0)),
         (new Vector3(10, 8, -10), new Vector3(30, -45, 0))
+    };*/
+    public const float Degree = 0.5f;
+
+    public readonly (Vector3, Vector3)[] PreviewCameraTransforms = new[]
+    {
+        (new Vector3(-10, 8, -10) * Degree, new Vector3(30, 45, 0)),
+        (new Vector3(-10, 8, 10) * Degree, new Vector3(30, 135, 0)),
+        (new Vector3(10, 8, 10) * Degree, new Vector3(30, -135, 0)),
+        (new Vector3(10, 8, -10) * Degree, new Vector3(30, -45, 0))
     };
 
     public Camera uiCamera; // UI 相机
@@ -27,6 +36,8 @@ public class RawImageRayCast : MonoBehaviour, IPointerMoveHandler, IPointerDownH
     public event Action<Vector2> OnBeginDragEvent;
     public event Action<Vector2> OnDragEvent;
     public event Action<Vector2> OnEndDragEvent;
+
+    public event Action<Vector2> OnClickNullEvent;
 
     public static readonly Vector2 YAxis = new(0, 1);
     public static Vector2 XAxis = new(0.894427191f, 0.447213596f);
@@ -100,7 +111,15 @@ public class RawImageRayCast : MonoBehaviour, IPointerMoveHandler, IPointerDownH
     public void OnPointerUp(PointerEventData eventData)
     {
         this._lastUpTime = Time.time;
-        if (this._lastUpTime - this._lastDownTime < 0.2f && this.TryGetInteractiveModel(out var model)) model.OnClick();
+        if (!(this._lastUpTime - this._lastDownTime < 0.2f)) return;
+        if (this.TryGetInteractiveModel(out var model))
+        {
+            model.OnClick();
+        }
+        else
+        {
+            this.OnClickNullEvent?.Invoke(this.ScreenMousePosition);
+        }
     }
 
     private void Update()

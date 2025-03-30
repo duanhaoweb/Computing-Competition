@@ -10,13 +10,6 @@ public class RawImageRayCast : MonoBehaviour, IPointerMoveHandler, IPointerDownH
     // 渲染 RenderTexture 的相机的位置和旋转, 第一个是位置, 第二个是旋转
     public int CurrentPreviewCameraIndex { get; private set; }
 
-    /*public readonly (Vector3, Vector3)[] PreviewCameraTransforms = new[]
-    {
-        (new Vector3(-10, 8, -10), new Vector3(30, 45, 0)),
-        (new Vector3(-10, 8, 10), new Vector3(30, 135, 0)),
-        (new Vector3(10, 8, 10), new Vector3(30, -135, 0)),
-        (new Vector3(10, 8, -10), new Vector3(30, -45, 0))
-    };*/
     public const float Degree = 0.5f;
 
     public readonly (Vector3, Vector3)[] PreviewCameraTransforms = new[]
@@ -126,7 +119,7 @@ public class RawImageRayCast : MonoBehaviour, IPointerMoveHandler, IPointerDownH
     {
         this.IsDragging =
             this._lastDownTime > this._lastUpTime && Time.time - this._lastDownTime > 0.2f; // 0.2秒内按下且未抬起, 认为是拖拽
-        if (this.IsDragging) this.OnDragEvent?.Invoke(this.ScreenMousePosition);
+        //if (this.IsDragging) this.OnDragEvent?.Invoke(this.ScreenMousePosition);
     }
 
     // 处理鼠标移动事件

@@ -1,9 +1,13 @@
-﻿using DG.Tweening;
+﻿using AI.BlockSystem;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private WoodBlockController woodBlockController;
+    [SerializeField] private AIWoodBlockController woodBlockController;
 
     [SerializeField] private float rotationDuration = 10f; // X 轴旋转一周所需的时间
 
@@ -15,15 +19,14 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        this.woodBlockController.Disable();
         this.woodBlockController.transform.position = new Vector3(0, -2.8f, 0);
         this.RotateObject();
         this.tutorialManager.OnTutorialComplete += this.OnTutorialComplete;
     }
 
-    private void OnTutorialComplete()
+    private async void OnTutorialComplete()
     {
-        this.StopRotation();
+        await this.StopRotation();
         this.woodBlockController.Enable();
     }
 
@@ -47,7 +50,7 @@ public class GameManager : MonoBehaviour
             .SetRelative(true);
     }
 
-    public void StopRotation()
+    private async UniTask StopRotation()
     {
         // 停止旋转动画
         if (this._rotationTweener != null && this._rotationTweener.IsActive())
@@ -63,8 +66,9 @@ public class GameManager : MonoBehaviour
             this._positionTweener = null;
         }
 
-        // 重置到初始状态（可选）
-        this.woodBlockController.transform.DOLocalMoveY(0, 0.5f);
-        this.woodBlockController.transform.DOLocalRotate(Vector3.zero, 0.5f);
+        Tween tween1 = this.woodBlockController.transform.DOLocalMoveY(0, 0.5f);
+        Tween tween2 = this.woodBlockController.transform.DOLocalRotate(new Vector3(0, 0, 0), 0.5f);
+        // 等待所有动画完成
+        await UniTask.WhenAll(tween1.ToUniTask(), tween2.ToUniTask());
     }
 }

@@ -3,11 +3,12 @@ using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using System;
-using System.Collections;
+using QFramework;
 
 public class TutorialManager : MonoBehaviour
 {
     [SerializeField] private GameObject tutorialPanel;
+    [SerializeField] private Material blurMaterial;
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private Button nextButton;
 
@@ -15,10 +16,12 @@ public class TutorialManager : MonoBehaviour
 
     private readonly string[] _tutorialSteps =
     {
-        "欢迎来到游戏!\n点击鼠标左键或按下空格键来旋转木块。",
-        "使用A/D键或方向键来移动木块。",
-        "目标是将木块完美放置到合适的位置。\n准备好了吗?"
+        "欢迎来到游戏!\n点击鼠标左键或按下空格键来旋转木块",
+        "使用A/D键或方向键来移动木块",
+        "目标是将木块完美放置到合适的位置 \n准备好了吗?"
     };
+
+    private static readonly int Intensity = Shader.PropertyToID("_Intensity");
 
     public event Action OnTutorialComplete;
 
@@ -35,7 +38,9 @@ public class TutorialManager : MonoBehaviour
             this.tutorialText.text = this._tutorialSteps[this._currentStep];
             // 添加文字动画效果
             this.tutorialText.DOFade(0, 0);
-            this.tutorialText.DOFade(1, 0.5f);
+            this.tutorialText.DOFade(1, 0.7f);
+            this.blurMaterial.SetFloat(Intensity, 0.5f);
+            ActionKit.Lerp(0.5f, 1.0f, 0.4f, t => { this.blurMaterial.SetFloat(Intensity, t); }).StartGlobal();
         }
     }
 
@@ -56,9 +61,11 @@ public class TutorialManager : MonoBehaviour
     {
         if (this.tutorialPanel != null)
         {
-            this.tutorialPanel.SetActive(false);
+            this.tutorialText.DOFade(0, 0.5f);
+            ActionKit.Sequence().Lerp(1.0f, 0.0f, 0.4f, t => { this.blurMaterial.SetFloat(Intensity, t); })
+                .Callback(() => { this.tutorialPanel.SetActive(false); }).StartGlobal();
         }
 
-        OnTutorialComplete?.Invoke();
+        this.OnTutorialComplete?.Invoke();
     }
 }

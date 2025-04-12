@@ -1,8 +1,11 @@
+using System.Threading;
+using BlockSystem.Abstractions;
+using BlockSystem.Implementation;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-namespace AI.BlockSystem
+namespace BlockSystem.States
 {
     public class RestoringState : IBlockState
     {
@@ -18,9 +21,8 @@ namespace AI.BlockSystem
         }
 
         public bool CanAcceptCommand => false; // 恢复过程中不接受新命令
-        public bool CanBeInterrupted => false; // 恢复过程不能被打断
 
-        public async UniTask EnterAsync(AIWoodBlock block)
+        public async UniTask EnterAsync(WoodBlock block, CancellationToken cancellationToken = default)
         {
             // 如果需要，触发警告效果
             if (this._alertOnEnter)
@@ -32,13 +34,13 @@ namespace AI.BlockSystem
             Tween rotateTween = block.transform.DORotateQuaternion(this._targetRotation, 0.3f);
 
             // 执行恢复动画
-            await UniTask.WhenAll(moveTween.ToUniTask(), rotateTween.ToUniTask());
-
+            await UniTask.WhenAll(moveTween.ToUniTask(cancellationToken: cancellationToken),
+                rotateTween.ToUniTask(cancellationToken: cancellationToken));
             // 恢复完成后，自动切换回空闲状态
             await block.SetStateAsync(IdleState.Instance);
         }
 
-        public UniTask ExitAsync(AIWoodBlock block)
+        public UniTask ExitAsync(WoodBlock block, CancellationToken cancellationToken = default)
         {
             // 恢复状态的退出不需要特殊处理
             return UniTask.CompletedTask;

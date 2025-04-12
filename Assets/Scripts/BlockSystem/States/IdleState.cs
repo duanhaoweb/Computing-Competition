@@ -1,11 +1,13 @@
+using System.Threading;
+using BlockSystem.Abstractions;
+using BlockSystem.Implementation;
 using Cysharp.Threading.Tasks;
 
-namespace AI.BlockSystem
+namespace BlockSystem.States
 {
     public class IdleState : IBlockState
     {
         public bool CanAcceptCommand => true;
-        public bool CanBeInterrupted => false; // 空闲状态不需要被打断
 
         public static readonly IdleState Instance = new IdleState();
 
@@ -14,13 +16,12 @@ namespace AI.BlockSystem
             // 尽量不 new ~
         }
 
-        public UniTask EnterAsync(AIWoodBlock block)
+        public UniTask EnterAsync(WoodBlock block, CancellationToken cancellationToken = default)
         {
-            // 空闲状态无需特殊的进入逻辑
             return UniTask.CompletedTask;
         }
 
-        public UniTask ExitAsync(AIWoodBlock block)
+        public UniTask ExitAsync(WoodBlock block, CancellationToken cancellationToken = default)
         {
             // 空闲状态无需特殊的退出逻辑
             return UniTask.CompletedTask;

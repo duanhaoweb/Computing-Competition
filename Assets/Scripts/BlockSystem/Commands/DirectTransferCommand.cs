@@ -1,9 +1,11 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
+using BlockSystem.Abstractions;
+using BlockSystem.Implementation;
+using BlockSystem.States;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace AI.BlockSystem
+namespace BlockSystem.Commands
 {
     public class DirectTransferCommand : BlockCommandBase
     {
@@ -19,16 +21,18 @@ namespace AI.BlockSystem
 
         public override (Vector3 move, Quaternion rotation) Transfer { get; protected set; }
 
-        protected override UniTask ExecuteInternalAsync(AIWoodBlock block, CancellationToken cancellationToken)
+        protected override async UniTask<CommandResult> ExecuteInternalAsync(WoodBlock block,
+            CancellationToken cancellationToken)
         {
             // 进入恢复状态
-            var restoringState = new RestoringState(this._targetPosition, this._targetRotation, false);
-            return block.SetStateAsync(restoringState);
+            RestoringState restoringState = new RestoringState(this._targetPosition, this._targetRotation, false);
+            await block.SetStateAsync(restoringState);
+            return CommandResult.Success();
         }
 
         public static DirectTransferCommand Create(Vector3 targetPosition, Quaternion targetRotation)
         {
-            var command = new DirectTransferCommand(-1, targetPosition, targetRotation);
+            DirectTransferCommand command = new DirectTransferCommand(-1, targetPosition, targetRotation);
             return command;
         }
     }

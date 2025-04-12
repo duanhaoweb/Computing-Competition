@@ -1,9 +1,12 @@
 using System.Threading;
+using BlockSystem.Abstractions;
+using BlockSystem.Implementation;
+using BlockSystem.States;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using QFramework;
 using UnityEngine;
 
-namespace AI.BlockSystem
+namespace BlockSystem.Commands
 {
     public class MoveCommand : BlockCommandBase
     {
@@ -41,61 +44,49 @@ namespace AI.BlockSystem
             return new MoveCommand(operationId, axis * Mathf.Sign(value), distance, duration);
         }
 
-        protected override async UniTask ExecuteInternalAsync(AIWoodBlock block, CancellationToken cancellationToken)
+        protected override async UniTask<CommandResult> ExecuteInternalAsync(WoodBlock block,
+            CancellationToken cancellationToken)
         {
-            var targetPosition = block.Position + this.Transfer.move;
+            Vector3 targetPosition = block.Position + this.Transfer.move;
 
             // 先保存原位置，用于可能的恢复
-            var originalPosition = block.Position;
+            Vector3 originalPosition = block.Position;
 
             // 创建并进入移动状态
-            var moveState = new MovingState(originalPosition, targetPosition, this._duration);
-            await block.SetStateAsync(moveState);
-            await block.SetStateAsync(IdleState.Instance);
-            /*try
+            MovingState moveState = new MovingState(originalPosition, targetPosition, this._duration);
+            CommandResult result = CommandResult.Pending();
+            AudioKit.PlaySound("移动");
+            await block.SetStateAsync(moveState, cancellationToken);
+
+            // 如果移动被取消，恢复到原始位置
+            if (cancellationToken.IsCancellationRequested)
             {
-                // 等待移动完成或被取消
-                while (block.CurrentState is MovingState currentMoveState && !currentMoveState.IsComplete)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await UniTask.Yield();
-                }
-
-                // 如果当前状态是恢复状态，说明发生了碰撞
-                if (block.CurrentState is RestoringState)
-                {
-                    throw new System.OperationCanceledException("Movement was interrupted by collision");
-                }
-
-                // 切换回空闲状态
-                await block.SetStateAsync(new IdleState());
+                await block.SetStateAsync(new RestoringState(originalPosition, block.Rotation));
+                await UniTask.Delay(300); // 等待一小段时间
+                result.Status = CommandResultStatus.Failed;
             }
-            catch (System.Exception)
+            else
             {
-                if (!(block.CurrentState is RestoringState))
-                {
-                    // 如果不是因为碰撞进入恢复状态，则手动恢复
-                    await block.SetStateAsync(new RestoringState(originalPosition, block.Rotation));
-                }
-                throw;
-            }*/
+                result.Status = CommandResultStatus.Success;
+            }
+
+            // 确保回到空闲状态, 其实RestoringState会自动切换到IdleState~
+            if (!(block.CurrentState is IdleState))
+            {
+                await block.SetStateAsync(IdleState.Instance);
+            }
+
+            return result;
         }
 
         public sealed override (Vector3 move, Quaternion rotation) Transfer { get; protected set; }
 
-        public override async UniTask UndoAsync(AIWoodBlock block)
+        public override async UniTask UndoAsync(WoodBlock block)
         {
             // 使用 MovingState 直接执行反向移动
-            var targetPosition = block.Position - this._moveDirection * this._moveDistance;
-            var movingState = new MovingState(block.Position, targetPosition, 0.05f);
+            Vector3 targetPosition = block.Position - this._moveDirection * this._moveDistance;
+            MovingState movingState = new MovingState(block.Position, targetPosition, 0.05f);
             await block.SetStateAsync(movingState);
-
-            // 等待移动完成后切换回空闲状态
-            while (block.CurrentState is MovingState currentMoveState && !currentMoveState.IsComplete)
-            {
-                await UniTask.Yield();
-            }
-
             // 确保回到空闲状态
             if (!(block.CurrentState is IdleState))
             {

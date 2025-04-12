@@ -1,13 +1,12 @@
-﻿using AI.BlockSystem;
+﻿using BlockSystem.Implementation;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using DG.Tweening.Core;
-using DG.Tweening.Plugins.Options;
+using QFramework;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private AIWoodBlockController woodBlockController;
+    [SerializeField] private WoodBlockController woodBlockController;
 
     [SerializeField] private float rotationDuration = 10f; // X 轴旋转一周所需的时间
 
@@ -19,20 +18,27 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        ResKit.Init();
         this.woodBlockController.transform.position = new Vector3(0, -2.8f, 0);
+        this.woodBlockController.Disable();
         this.RotateObject();
+        this.tutorialManager.StartTutorial();
         this.tutorialManager.OnTutorialComplete += this.OnTutorialComplete;
     }
 
-    private async void OnTutorialComplete()
+    private async UniTaskVoid OnTutorialComplete()
     {
+        this.tutorialManager.OnTutorialComplete -= this.OnTutorialComplete;
         await this.StopRotation();
+        this.woodBlockController.onSuccess.AddListener(this.GameComplete);
         this.woodBlockController.Enable();
     }
 
-    private void OnDestroy()
+    private void GameComplete()
     {
-        this.tutorialManager.OnTutorialComplete -= this.OnTutorialComplete;
+        this.woodBlockController.Disable();
+        this.woodBlockController.transform.DOMoveY(-2.8f, 0.5f).onComplete += this.RotateObject;
+        this.tutorialManager.ShowGameComplete(Application.Quit);
     }
 
     private void RotateObject()

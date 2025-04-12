@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace AI.BlockSystem.Data
+namespace BlockSystem.Data
 {
     /// <summary>
     /// 块操作类型，对应不同的操作命令
@@ -71,7 +71,7 @@ namespace AI.BlockSystem.Data
         /// </summary>
         public static BlockOperationData CreateMoveOperation(int id, Vector3 axis, int value)
         {
-            var type = axis.x != 0 ? BlockOperationType.MoveX :
+            BlockOperationType type = axis.x != 0 ? BlockOperationType.MoveX :
                 axis.y != 0 ? BlockOperationType.MoveY :
                 BlockOperationType.MoveZ;
             return new BlockOperationData(id, type, value);
@@ -82,7 +82,7 @@ namespace AI.BlockSystem.Data
         /// </summary>
         public static BlockOperationData CreateRotateOperation(int id, Vector3 axis, int value)
         {
-            var type = axis.x != 0 ? BlockOperationType.RotateX :
+            BlockOperationType type = axis.x != 0 ? BlockOperationType.RotateX :
                 axis.y != 0 ? BlockOperationType.RotateY :
                 BlockOperationType.RotateZ;
             return new BlockOperationData(id, type, value);

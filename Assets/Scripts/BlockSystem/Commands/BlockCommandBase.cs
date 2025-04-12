@@ -1,9 +1,11 @@
-using System;
 using System.Threading;
+using BlockSystem.Abstractions;
+using BlockSystem.Implementation;
+using BlockSystem.States;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace AI.BlockSystem
+namespace BlockSystem.Commands
 {
     public abstract class BlockCommandBase : IBlockCommand
     {
@@ -20,7 +22,7 @@ namespace AI.BlockSystem
             this.OperationId = operationId;
         }
 
-        public async UniTask<CommandResult> ExecuteAsync(AIWoodBlock block)
+        public async UniTask<CommandResult> ExecuteAsync(WoodBlock block)
         {
             // 保存初始状态，用于可能的恢复
             this.OriginalPosition = block.Position;
@@ -28,17 +30,14 @@ namespace AI.BlockSystem
             this.WasInterrupted = false;
 
             // 创建取消令牌源
-            var cts = new CancellationTokenSource();
-            var collisionToken = cts.Token;
+            CancellationTokenSource cts = new CancellationTokenSource();
+            CancellationToken collisionToken = cts.Token;
 
             try
             {
                 // 注册碰撞检测
                 void OnCollision()
                 {
-                    if (block.CurrentState is { CanBeInterrupted: false })
-                        return;
-                    this.WasInterrupted = true;
                     if (!cts.IsCancellationRequested)
                     {
                         cts.Cancel();
@@ -46,20 +45,11 @@ namespace AI.BlockSystem
                 }
 
                 block.OnTriggerEnterEvent.Register(OnCollision);
-
                 try
                 {
                     // 执行具体的命令逻辑
-                    await this.ExecuteInternalAsync(block, collisionToken);
-
-                    // 如果被中断（发生碰撞），恢复到原始位置
-                    if (this.WasInterrupted)
-                    {
-                        await block.SetStateAsync(new RestoringState(this.OriginalPosition, this.OriginalRotation));
-                        return CommandResult.Failed("Command was interrupted by collision");
-                    }
-
-                    return CommandResult.Success();
+                    CommandResult r = await this.ExecuteInternalAsync(block, collisionToken);
+                    return r;
                 }
                 finally
                 {
@@ -74,7 +64,7 @@ namespace AI.BlockSystem
             }
         }
 
-        public virtual UniTask UndoAsync(AIWoodBlock block)
+        public virtual UniTask UndoAsync(WoodBlock block)
         {
             // 默认的撤销操作是恢复到原始位置，但不显示警告效果
             return block.SetStateAsync(new RestoringState(
@@ -88,6 +78,7 @@ namespace AI.BlockSystem
         /// </summary>
         /// <param name="block">操作的木块</param>
         /// <param name="cancellationToken">如果发生碰撞，此令牌将被取消</param>
-        protected abstract UniTask ExecuteInternalAsync(AIWoodBlock block, CancellationToken cancellationToken);
+        protected abstract UniTask<CommandResult> ExecuteInternalAsync(WoodBlock block,
+            CancellationToken cancellationToken);
     }
 }

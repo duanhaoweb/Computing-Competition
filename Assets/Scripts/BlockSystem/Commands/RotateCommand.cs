@@ -1,9 +1,12 @@
 using System.Threading;
+using BlockSystem.Abstractions;
+using BlockSystem.Implementation;
+using BlockSystem.States;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using QFramework;
 using UnityEngine;
 
-namespace AI.BlockSystem
+namespace BlockSystem.Commands
 {
     public class RotateCommand : BlockCommandBase
     {
@@ -41,52 +44,47 @@ namespace AI.BlockSystem
             return new RotateCommand(operationId, axis, angle * Mathf.Sign(value), duration);
         }
 
-        protected override async UniTask ExecuteInternalAsync(AIWoodBlock block, CancellationToken cancellationToken)
+        protected override async UniTask<CommandResult> ExecuteInternalAsync(WoodBlock block,
+            CancellationToken cancellationToken)
         {
             // 计算目标旋转
-            var targetRotation = this.Transfer.rotation * block.Rotation;
+            Quaternion targetRotation = this.Transfer.rotation * block.Rotation;
+
+            // 先保存原旋转，用于可能的恢复
+            Quaternion originalRotation = block.Rotation;
 
             // 创建并进入旋转状态
-            var rotateState = new RotatingState(block.Rotation, targetRotation, this._duration);
-            await block.SetStateAsync(rotateState);
-
-            try
+            RotatingState rotateState = new RotatingState(block.Rotation, targetRotation, this._duration);
+            CommandResult result = CommandResult.Pending();
+            AudioKit.PlaySound("移动");
+            await block.SetStateAsync(rotateState, cancellationToken);
+            // 如果旋转被取消，恢复到原始状态
+            if (cancellationToken.IsCancellationRequested)
             {
-                // 等待旋转完成或被取消
-                while (block.CurrentState is RotatingState currentRotateState && !currentRotateState.IsComplete)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await UniTask.Yield();
-                }
+                await block.SetStateAsync(new RestoringState(block.Position, originalRotation));
+                result.Status = CommandResultStatus.Failed;
+            }
+            else
+            {
+                result.Status = CommandResultStatus.Success;
+            }
 
-                // 如果当前状态是恢复状态，说明发生了碰撞
-                if (block.CurrentState is RestoringState)
-                {
-                    throw new System.OperationCanceledException("Rotation was interrupted by collision");
-                }
-
-                // 切换回空闲状态
+            // 确保回到空闲状态, 其实RestoringState会自动切换到IdleState~
+            if (!(block.CurrentState is IdleState))
+            {
                 await block.SetStateAsync(IdleState.Instance);
             }
-            catch (System.Exception)
-            {
-                if (!(block.CurrentState is RestoringState))
-                {
-                    // 如果不是因为碰撞进入恢复状态，则手动恢复
-                    await block.SetStateAsync(new RestoringState(block.Position, block.Rotation));
-                }
 
-                throw;
-            }
+            return result;
         }
 
         public sealed override (Vector3 move, Quaternion rotation) Transfer { get; protected set; }
 
-        public override async UniTask UndoAsync(AIWoodBlock block)
+        public override async UniTask UndoAsync(WoodBlock block)
         {
             // 使用 RotatingState 直接执行反向旋转，不通过命令系统
-            var targetRotation = Quaternion.AngleAxis(-this._rotationAngle, this._rotationAxis) * block.Rotation;
-            var rotateState = new RotatingState(block.Rotation, targetRotation, this._duration);
+            Quaternion targetRotation = Quaternion.AngleAxis(-this._rotationAngle, this._rotationAxis) * block.Rotation;
+            RotatingState rotateState = new RotatingState(block.Rotation, targetRotation, this._duration);
             await block.SetStateAsync(rotateState);
 
             // 等待旋转完成后切换回空闲状态

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using System;
+using Cysharp.Threading.Tasks;
 using QFramework;
 
 public class TutorialManager : MonoBehaviour
@@ -16,20 +17,17 @@ public class TutorialManager : MonoBehaviour
 
     private readonly string[] _tutorialSteps =
     {
-        "欢迎来到游戏!\n点击鼠标左键或按下空格键来旋转木块",
-        "使用A/D键或方向键来移动木块",
-        "目标是将木块完美放置到合适的位置 \n准备好了吗?"
+        "欢迎来到游戏!\n试着在指引下将木块拼装为鲁班锁吧!",
+        "鼠标左键长按并拖动木块, 即可移动木块\n使用R/T/F键, 可以旋转木块",
+        "鼠标右键拖动(或在空白处使用鼠标左键拖动)\n可以旋转视角" +
+        "滑动鼠标滚轮, 可以缩放视角",
+        "使用Z键, 可以撤回您的操作",
+        "您可以点击右上角的按钮再次查看游戏说明"
     };
 
     private static readonly int Intensity = Shader.PropertyToID("_Intensity");
 
-    public event Action OnTutorialComplete;
-
-    private void Start()
-    {
-        if (this.nextButton != null) this.nextButton.onClick.AddListener(this.NextStep);
-        this.ShowCurrentStep();
-    }
+    public event Func<UniTaskVoid> OnTutorialComplete;
 
     private void ShowCurrentStep()
     {
@@ -42,6 +40,21 @@ public class TutorialManager : MonoBehaviour
             this.blurMaterial.SetFloat(Intensity, 0.5f);
             ActionKit.Lerp(0.5f, 1.0f, 0.4f, t => { this.blurMaterial.SetFloat(Intensity, t); }).StartGlobal();
         }
+    }
+
+    public void ShowGameComplete(Action exit)
+    {
+        this.nextButton.onClick.AddListener(() =>
+        {
+            this.CompleteTutorial();
+            exit?.Invoke();
+        });
+        this.tutorialPanel.SetActive(true);
+        this.tutorialText.text = "恭喜您完成了游戏!";
+        this.tutorialText.DOFade(0, 0);
+        this.tutorialText.DOFade(1, 0.7f);
+        this.blurMaterial.SetFloat(Intensity, 0.5f);
+        ActionKit.Lerp(0.5f, 1.0f, 0.4f, t => { this.blurMaterial.SetFloat(Intensity, t); }).StartGlobal();
     }
 
     private void NextStep()
@@ -57,6 +70,14 @@ public class TutorialManager : MonoBehaviour
         this.ShowCurrentStep();
     }
 
+    public void StartTutorial()
+    {
+        this.tutorialPanel.SetActive(true);
+        this._currentStep = 0;
+        this.nextButton.onClick.AddListener(this.NextStep);
+        this.ShowCurrentStep();
+    }
+
     private void CompleteTutorial()
     {
         if (this.tutorialPanel != null)
@@ -66,6 +87,7 @@ public class TutorialManager : MonoBehaviour
                 .Callback(() => { this.tutorialPanel.SetActive(false); }).StartGlobal();
         }
 
+        this.nextButton.onClick.RemoveListener(this.NextStep);
         this.OnTutorialComplete?.Invoke();
     }
 }

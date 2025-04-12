@@ -20,7 +20,7 @@ Shader "Custom/Outline Fill"
     {
         Tags
         {
-            "Queue" = "Transparent+110"
+            "Queue" = "Transparent-10"
             "RenderType" = "Transparent"
             "DisableBatching" = "True"
         }

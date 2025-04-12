@@ -1,8 +1,11 @@
+using System.Threading;
+using BlockSystem.Abstractions;
+using BlockSystem.Implementation;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-namespace AI.BlockSystem
+namespace BlockSystem.States
 {
     public class RotatingState : IBlockState
     {
@@ -11,7 +14,7 @@ namespace AI.BlockSystem
         private readonly float _duration;
 
         public bool CanAcceptCommand => false; // 旋转过程中不接受新命令
-        public bool CanBeInterrupted => true; // 旋转过程中可以被碰撞打断
+
         public bool IsComplete { get; private set; }
 
         public RotatingState(Quaternion startRotation, Quaternion targetRotation, float duration = 0.2f)
@@ -28,19 +31,19 @@ namespace AI.BlockSystem
         public static RotatingState CreateFromAxisAngle(Vector3 axis, float angle, Quaternion currentRotation,
             float duration = 0.2f)
         {
-            var rotation = Quaternion.AngleAxis(angle, axis);
-            var targetRotation = rotation * currentRotation;
+            Quaternion rotation = Quaternion.AngleAxis(angle, axis);
+            Quaternion targetRotation = rotation * currentRotation;
             return new RotatingState(currentRotation, targetRotation, duration);
         }
 
-        public async UniTask EnterAsync(AIWoodBlock block)
+        public async UniTask EnterAsync(WoodBlock block, CancellationToken cancellationToken = default)
         {
             var tween = block.transform.DORotateQuaternion(this._targetRotation, this._duration);
-            await tween.ToUniTask();
+            await tween.ToUniTask(cancellationToken: cancellationToken);
             this.IsComplete = true;
         }
 
-        public UniTask ExitAsync(AIWoodBlock block)
+        public UniTask ExitAsync(WoodBlock block, CancellationToken cancellationToken = default)
         {
             return UniTask.CompletedTask;
         }

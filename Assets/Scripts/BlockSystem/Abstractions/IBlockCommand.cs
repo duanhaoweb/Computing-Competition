@@ -1,7 +1,8 @@
+using BlockSystem.Implementation;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace AI.BlockSystem
+namespace BlockSystem.Abstractions
 {
     public enum CommandResultStatus
     {
@@ -30,13 +31,13 @@ namespace AI.BlockSystem
         /// </summary>
         /// <param name="block">执行命令的木块</param>
         /// <returns>命令执行结果</returns>
-        UniTask<CommandResult> ExecuteAsync(AIWoodBlock block);
+        UniTask<CommandResult> ExecuteAsync(WoodBlock block);
 
         /// <summary>
         /// 异步撤销命令
         /// </summary>
         /// <param name="block">需要撤销命令的木块</param>
-        UniTask UndoAsync(AIWoodBlock block);
+        UniTask UndoAsync(WoodBlock block);
 
         /// <summary>
         /// 获取命令的转移信息

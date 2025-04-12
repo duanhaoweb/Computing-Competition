@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using AI.BlockSystem.Data;
+using BlockSystem.Data;
+using BlockSystem.Implementation;
 using Cysharp.Threading.Tasks;
 
-namespace AI.BlockSystem
+namespace BlockSystem.Abstractions
 {
     /// <summary>
     /// 木块操作处理器接口，用于管理全局操作
@@ -17,7 +18,7 @@ namespace AI.BlockSystem
         /// <summary>
         /// 执行操作并记录到历史
         /// </summary>
-        UniTask<CommandResult> ExecuteOperationAsync(AIWoodBlock block, BlockOperationData data);
+        UniTask<CommandResult> ExecuteOperationAsync(WoodBlock block, BlockOperationData data);
 
         /// <summary>
         /// 撤销上一步操作
@@ -32,7 +33,7 @@ namespace AI.BlockSystem
         /// <summary>
         /// 获取操作历史
         /// </summary>
-        IReadOnlyList<(BlockOperationData Data, AIWoodBlock Block)> GetOperationHistory();
+        IReadOnlyList<(BlockOperationData Data, WoodBlock Block)> GetOperationHistory();
 
         /// <summary>
         /// 清空操作历史
